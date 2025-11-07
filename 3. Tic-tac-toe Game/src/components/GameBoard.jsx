@@ -1,13 +1,11 @@
+const initialGameBoard = [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null],
+];
+
 export default function GameBoard(){
     return <ol id="game-board">
-        <li>
-            <ol>
-                <li></li>
-                <li></li>
-                <li></li> 
-            </ol>
-        </li>
-        <li></li>
-        <li></li>
+        {initialGameBoard.map((row, rowIndex) => <li key={rowIndex}></li>)}
     </ol>
 }
