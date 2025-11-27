@@ -7,11 +7,12 @@ export default function Player() {
 
 
   function handleChange(event){
+    setSubmitted(false);
     setEnteredPlayerName(event.target.value);
   }
 
   function handleClick(){
-
+    setSubmitted(true);
   }
 
   return (
