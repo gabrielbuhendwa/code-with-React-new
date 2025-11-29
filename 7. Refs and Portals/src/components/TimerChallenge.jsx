@@ -4,6 +4,7 @@ export default function TimerChallenge({title, targetTime}) {
  const [timerStarted, setTimerStarted] = usesState(false);
  const [timerExpired, setTimerExpired] = useState(false);   
 
+ //starting the challenge timer 
  function handleStart(){
     setTimeout(()=> {
         setTimerExpired(true);
@@ -12,7 +13,13 @@ export default function TimerChallenge({title, targetTime}) {
     setTimerStarted(true);
  }
 
- return (
+ //finishing the challenge timer
+ function handleStop(){
+    
+ }
+
+
+
  <section className="challenge">
     <h2>{title}</h2>
     {timerExpired && <p>You lost</p>}
