@@ -42,7 +42,13 @@ function App() {
       const place = AVAILABLE_PLACES.find((place) => place.id === id);
       return [place, ...prevPickedPlaces];
     });
-  }
+    //using the local storage to store the the images selected  
+    const storeIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    if (!storeIds.indexOf(id) === -1) {
+      localStorage.setItem('selectedPlaces', JSON.stringify([id, ...storeIds]));
+    }
+  }  
+    
 
   function handleRemovePlace() {
     setPickedPlaces((prevPickedPlaces) =>
