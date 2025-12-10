@@ -13,6 +13,14 @@ function App() {
   const [availablePlaces, setAvailablePlaces] = useState([]); 
   const [pickedPlaces, setPickedPlaces] = useState([]);
 
+
+  useEffect(() => {
+    const storedIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    const storedPlaces = storedIds.map(id => AVAILABLE_PLACES.find((place) =>place.id === id));
+
+    setPickedPlaces(storedPlaces);
+  }, []);
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
       const sortedPlaces = sortPlacesByDistance(
@@ -43,9 +51,9 @@ function App() {
       return [place, ...prevPickedPlaces];
     });
     //using the local storage to store the the images selected  
-    const storeIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
-    if (!storeIds.indexOf(id) === -1) {
-      localStorage.setItem('selectedPlaces', JSON.stringify([id, ...storeIds]));
+    const storedIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    if (storedIds.indexOf(id) === -1) {
+      localStorage.setItem('selectedPlaces', JSON.stringify([id, ...storedIds]));
     }
   }  
     
@@ -55,6 +63,13 @@ function App() {
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
     modal.current.close();
+
+    //removing the items (places)
+    const storedIds = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    localStorage.setItem(
+      'selectedPlaces', 
+      JSON.stringify(storedIds.filter((id) => id !== selectedPlace.current))
+    );
   }
 
   return (
