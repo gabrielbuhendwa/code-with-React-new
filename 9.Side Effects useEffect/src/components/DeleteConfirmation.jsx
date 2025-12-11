@@ -1,11 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react'; // <-- useState was missing
+const TIMER = 3000;
 
 export default function DeleteConfirmation({ onConfirm, onCancel }) {
+  const [remainingTime, setRemainingTime] = useState(TIMER); // <-- missing '='
+
+  // animation bar logic using useEffect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRemainingTime(prevTime => prevTime - 10);
+    }, 10);
+
+    return () => {
+      clearInterval(interval);
+    };  
+  }, []);
+
   useEffect(() => {
     console.log('TIMER SET');
     const timer = setTimeout(() => {
       onConfirm();
-    }, 3000);
+    }, TIMER);
 
     return () => {
       console.log('Cleaning up timer');
@@ -25,6 +39,7 @@ export default function DeleteConfirmation({ onConfirm, onCancel }) {
           Yes
         </button>
       </div>
+      <progress value={remainingTime} max={TIMER}/>
     </div>
   );
 }
