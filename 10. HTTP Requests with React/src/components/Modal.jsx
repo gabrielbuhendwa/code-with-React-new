@@ -1,23 +1,25 @@
-import { useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useRef, useEffect } from 'react'; // Import necessary hooks from React
+import { createPortal } from 'react-dom';  // Import createPortal for rendering modal outside component tree
 
 function Modal({ open, children, onClose }) {
-  const dialog = useRef();
+  const dialog = useRef(); // useRef to access the dialog DOM element
 
   useEffect(() => {
+    // When the 'open' prop changes, show or close the modal dialog accordingly
     if (open) {
-      dialog.current.showModal();
+      dialog.current.showModal(); // Show the modal when 'open' is true
     } else {
-      dialog.current.close();
+      dialog.current.close(); // Close the modal when 'open' is false
     }
-  }, [open]);
+  }, [open]); // Dependency on 'open' to react to prop changes
 
+  // Render the modal dialog inside the #modal element on the DOM using createPortal
   return createPortal(
     <dialog className="modal" ref={dialog} onClose={onClose}>
-      {open ? children : null}
+      {open ? children : null} {/* Render children only if modal is open */}
     </dialog>,
-    document.getElementById('modal')
+    document.getElementById('modal') // Specify the DOM node where modal should appear
   );
 }
 
-export default Modal;
+export default Modal; // Export the Modal component for use in other files
