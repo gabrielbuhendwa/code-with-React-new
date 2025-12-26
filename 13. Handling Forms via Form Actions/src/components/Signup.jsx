@@ -4,7 +4,6 @@ export default function Signup() {
     console.log(enteredEmail);
   }
 
-
   return (
     <form action={signupAction}>
       <h2>Welcome on board!</h2>
