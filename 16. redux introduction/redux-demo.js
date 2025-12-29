@@ -1,24 +1,27 @@
-//this is how w import redux or any othe things from node module
-const redux = require('redux');
+const redux = require('redux'); // Import redux library from node_modules
 
-
-//declaring the reducer function and what it should return as a new state 
-const counterReducer = (state = { counter: 0 }, action) => {
-    return {
-        counter: state.counter + 1
-    };
-
+const counterReducer = (state = { counter: 0 }, action) => { // Reducer: handles actions and returns updated state
+    if (action.type === 'increment') { // Check if action is 'increment'
+        return {
+            counter: state.counter + 1, // Increment counter in state
+        };
+    }
+    if (action.type === 'decrement') { // Check if action is 'decrement'
+        return {
+            counter: state.counter - 1, // Decrement counter in state
+        };
+    }
+    return state; // Return unchanged state for unknown action types
 };
 
-//creating the central data (state) store 
-const store = redux.createStore(counterReducer);
+const store = redux.createStore(counterReducer); // Create store using the reducer
 
-const counterSubscriber = () => {
-   const latestState =  store.getState();
-   console.log(latestState);
+const counterSubscriber = () => { // Listener function for state changes
+    const latestState = store.getState(); // Get current/latest state from store
+    console.log(latestState); // Log the current state
 };
 
-store.subscribe(counterSubscriber);
+store.subscribe(counterSubscriber); // Register subscriber to be called on state changes
 
-//store that dispatch an action, action which is a js object 
-store.dispatch({ type: 'increment'});
+store.dispatch({ type: 'increment' }); // Dispatch 'increment' action to update state
+store.dispatch({ type: 'decrement' }); // Dispatch 'decrement' action to update state
