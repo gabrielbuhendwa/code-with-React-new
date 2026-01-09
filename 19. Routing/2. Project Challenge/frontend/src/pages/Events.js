@@ -16,17 +16,30 @@ function EventsPage() {
 export default EventsPage;
 
 export async function loader() {
-  const response = await fetch('http://localhost:8080/events');
+  try {
+    const response = await fetch('http://localhost:8080/events');
 
-  if (!response.ok) {
-    // return { isError: true, message: 'Could not fetch events.' };
-    // throw new Response(JSON.stringify({ message: 'Could not fetch events.' }), {
-    //   status: 500,
-    // });
-    throw new Response(JSON.stringify({ message: 'Could not fetch events.' }), {
+    if (!response.ok) {
+      // Preserve the original status code from the backend
+      const errorData = await response.json().catch(() => ({ message: 'Could not fetch events.' }));
+      throw new Response(JSON.stringify({ message: errorData.message || 'Could not fetch events.' }), {
+        status: response.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } else {
+      // Parse and return the JSON data, not the Response object
+      return response.json();
+    }
+  } catch (error) {
+    // Handle network errors or other fetch failures
+    if (error instanceof Response) {
+      // Re-throw Response errors as-is
+      throw error;
+    }
+    // Handle network errors (wrong URL, connection failed, etc.)
+    throw new Response(JSON.stringify({ message: 'Failed to fetch events. Please check your connection.' }), {
       status: 500,
+      headers: { 'Content-Type': 'application/json' },
     });
-  } else {
-    return response;
   }
 }
