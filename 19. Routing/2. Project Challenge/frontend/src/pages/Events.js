@@ -1,45 +1,37 @@
-import { useLoaderData } from 'react-router-dom';
+import { Suspense } from 'react';
+import { useLoaderData, Await } from 'react-router-dom';
 
 import EventsList from '../components/EventsList';
 
 function EventsPage() {
-  const data = useLoaderData();
+  const { events } = useLoaderData();
 
-  // if (data.isError) {
-  //   return <p>{data.message}</p>;
-  // }
-  const events = data.events;
-
-  return <EventsList events={events} />;
+  return (
+    <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
+      <Await resolve={events}>
+        {(loadedEvents) => <EventsList events={loadedEvents} />}
+      </Await>
+    </Suspense>
+  );
 }
 
 export default EventsPage;
 
-export async function loader() {
-  try {
-    const response = await fetch('http://localhost:8080/events');
+async function loadEvents() {
+  const response = await fetch('http://localhost:8080/events');
 
-    if (!response.ok) {
-      // Preserve the original status code from the backend
-      const errorData = await response.json().catch(() => ({ message: 'Could not fetch events.' }));
-      throw new Response(JSON.stringify({ message: errorData.message || 'Could not fetch events.' }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } else {
-      // Parse and return the JSON data, not the Response object
-      return response.json();
-    }
-  } catch (error) {
-    // Handle network errors or other fetch failures
-    if (error instanceof Response) {
-      // Re-throw Response errors as-is
-      throw error;
-    }
-    // Handle network errors (wrong URL, connection failed, etc.)
-    throw new Response(JSON.stringify({ message: 'Failed to fetch events. Please check your connection.' }), {
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'Could not fetch events.' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
     });
+  } else {
+    const resData = await response.json();
+    return resData.events;
   }
+}
+
+export function loader() {
+  return {
+    events: loadEvents(),
+  };
 }

@@ -1,44 +1,79 @@
-import { useLoaderData } from 'react-router-dom';
+import { Suspense } from 'react';
+import {
+  useRouteLoaderData,
+  redirect,
+  Await,
+} from 'react-router-dom';
 
 import EventItem from '../components/EventItem';
+import EventsList from '../components/EventsList';
 
 function EventDetailPage() {
-  const data = useLoaderData();
+  const { event, events } = useRouteLoaderData('event-detail');
 
   return (
-    <EventItem event={data.event} />
+    <>
+      <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
+        <Await resolve={event}>
+          {(loadedEvent) => <EventItem event={loadedEvent} />}
+        </Await>
+      </Suspense>
+      <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
+        <Await resolve={events}>
+          {(loadedEvents) => <EventsList events={loadedEvents} />}
+        </Await>
+      </Suspense>
+    </>
   );
 }
 
 export default EventDetailPage;
 
-export async function loader({request, params}) {
+async function loadEvent(id) {
+  const response = await fetch('http://localhost:8080/events/' + id);
+
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'Could not fetch details for selected event.' }), {
+      status: 500,
+    });
+  } else {
+    const resData = await response.json();
+    return resData.event;
+  }
+}
+
+async function loadEvents() {
+  const response = await fetch('http://localhost:8080/events');
+
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'Could not fetch events.' }), {
+      status: 500,
+    });
+  } else {
+    const resData = await response.json();
+    return resData.events;
+  }
+}
+
+export function loader({ request, params }) {
   const id = params.eventId;
 
-  try {
-    const response = await fetch('http://localhost:8080/events/' + id);
+  return {
+    event: loadEvent(id),
+    events: loadEvents(),
+  };
+}
 
-    if (!response.ok) {
-      // Preserve the original status code from the backend
-      const errorData = await response.json().catch(() => ({ message: 'Could not fetch event details.' }));
-      throw new Response(JSON.stringify({ message: errorData.message || 'Could not fetch event details.' }), {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } else {
-      // Parse and return the JSON data, not the Response object
-      return response.json();
-    }
-  } catch (error) {
-    // Handle network errors or other fetch failures
-    if (error instanceof Response) {
-      // Re-throw Response errors as-is
-      throw error;
-    }
-    // Handle network errors (wrong URL, connection failed, etc.)
-    throw new Response(JSON.stringify({ message: 'Failed to fetch event details. Please check your connection.' }), {
+export async function action({ params, request }) {
+  const eventId = params.eventId;
+  const response = await fetch('http://localhost:8080/events/' + eventId, {
+    method: request.method,
+  });
+
+  if (!response.ok) {
+    throw new Response(JSON.stringify({ message: 'Could not delete event.' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
     });
   }
+  return redirect('/events');
 }
